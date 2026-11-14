@@ -1,0 +1,9 @@
+ [project]
+name = "Lab_3"
+version = "0.1"
+description = "description"
+requires-python = ">=3.14.7"
+dependencies = [
+    "pytest>=9.2.0",
+    "pydantic>=2.14.3"
+]
