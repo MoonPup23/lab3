@@ -17,5 +17,6 @@ class UnsupportedFormatVersion(CatalogError):
 class BrokenFile(CatalogError):
     pass
 
+
 class ObjectNotFound(CatalogError):
     pass

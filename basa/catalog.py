@@ -1,12 +1,14 @@
-from typing import Any
 from _collections_abc import Iterator
 
-from basa.models import Detail, Rule
 from basa.exceptions import DuplicateId, ObjectNotFound
+from basa.models import Detail
 
 
 class Command:
+    """Каталог деталей"""
+
     def __init__(self):
+
         self.data: dict = {}
 
     def add(self, item: Detail) -> None:
@@ -45,12 +47,9 @@ class Command:
     def __len__(self) -> int:
         return len(self.data)
 
-    def __iter__(self, id: Detail) -> Iterator[Any]:
+    def __iter__(self) -> Iterator[Detail]:
+        """Итерация деталей выполняется по добавлению в файл"""
         return iter(self.data.values())
 
     def __contains__(self, item_id: str) -> bool:
-        if item_id not in self.data:
-            return False
-        return True
-
-
+        return item_id in self.data

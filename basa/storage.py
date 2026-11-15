@@ -1,29 +1,31 @@
 import json
+
 from pydantic import ValidationError
 
 from basa.catalog import Command
 from basa.exceptions import (
-    UnsupportedFormatVersion,
+    BrokenFile,
     DuplicateId,
-    BrokenFile, IncorrectEssence
+    IncorrectEssence,
+    UnsupportedFormatVersion,
 )
 from basa.models import Detail
 
 
 def save_file(database: Command, path: str) -> None:
-    items = [
-        detail.model_dump(mode="json")
-        for detail in database.data.values()
-    ]
-    data = {
-        "format_version": 1,
-        "items": items
-    }
+    """Сохранение каталога в JSON файл"""
+
+    items = [detail.model_dump(mode="json") for detail in database.data.values()]
+    data = {"format_version": 1, "items": items}
+
     with open(path, "w", encoding="utf-8") as file:
         json.dump(data, file, ensure_ascii=False, indent=3)
 
 
 def load_file(database: Command, path: str) -> None:
+    """Загружает каталог из JSOn фала и заменяет им содержимое.
+     Проверка на корректность подгружаемых данных"""
+
     try:
         with open(path, "r", encoding="utf-8") as file:
             data = json.load(file)
@@ -34,25 +36,23 @@ def load_file(database: Command, path: str) -> None:
                 raise BrokenFile(f"incorrect format: {data}")
 
     except json.JSONDecodeError:
-        raise BrokenFile(f"JSON file is broken")
+        raise BrokenFile("JSON file is broken")
 
     data_control = {}
 
     if data["format_version"] != 1:
         raise UnsupportedFormatVersion(f"format version data: {data} is unsupported")
 
-
     else:
         items = data["items"]
         if not isinstance(items, list):
             raise BrokenFile(f"incorrect data:{items}")
 
-
         for item in items:
             try:
                 detail = Detail.model_validate(item)
             except ValidationError as error:
-                raise IncorrectEssence(f"Incorrect detail") from error
+                raise IncorrectEssence("Incorrect detail") from error
 
             if detail.id in data_control:
                 raise DuplicateId(f"this id:{detail.id} already in database")
